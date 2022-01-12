@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
-namespace Minecraft {
 
 class Window {
 public:
@@ -14,6 +13,8 @@ public:
     void clear();
     void display();
 
+    void close(bool value);
+
 private:
     bool init(unsigned int flags);
 
@@ -23,4 +24,3 @@ private:
 
     GLFWwindow *m_window;
 };
-} // namespace Minecraft

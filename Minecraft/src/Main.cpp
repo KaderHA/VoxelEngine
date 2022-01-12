@@ -9,6 +9,7 @@
 #include "Input.hpp"
 #include "Shader.hpp"
 #include "Vertex.hpp"
+#include "Window.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -18,30 +19,7 @@ float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow *window = glfwCreateWindow(800, 600, "Chunk Optimization", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetFramebufferSizeCallback(window, Input::framebuffer_size_callback);
-
-    glfwSetKeyCallback(window, Input::key_callback);
-    glfwSetMouseButtonCallback(window, Input::mouse_button_callback);
-    glfwSetCursorPosCallback(window, Input::cursor_position_callback);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
+    Window window(800, 600, "Minecraft!");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -92,15 +70,15 @@ int main() {
     }
     stbi_image_free(data);
 
-    while (!glfwWindowShouldClose(window)) {
-        if (Input::isKeyPressed(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, true);
-        glfwPollEvents();
+    while (window.isOpen()) {
+        if (Input::isKeyPressed(GLFW_KEY_ESCAPE)) window.close(true);
+        window.pollEvents();
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         cam.update(deltaTime);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        window.clear();
 
         program.bind();
         program.setMat4fv("uView", cam.getViewMatrix());
@@ -115,7 +93,7 @@ int main() {
                 chunks[i].Render(program);
             }
         }
-        glfwSwapBuffers(window);
+        window.display();
     }
 
     return 0;

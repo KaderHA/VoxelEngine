@@ -1,7 +1,8 @@
 #include "Window.hpp"
+#include "Input.hpp"
+
 #include <iostream>
 
-namespace Minecraft {
 Window::Window(int width_, int height_, const char *title_, unsigned int flags)
     : m_width(width_), m_height(height_), m_title(title_) {
     if (!init(flags)) {
@@ -24,8 +25,14 @@ bool Window::init(unsigned int flags) {
     if (!m_window) {
         return false;
     }
-
     glfwMakeContextCurrent(m_window);
+
+    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetFramebufferSizeCallback(m_window, Input::framebuffer_size_callback);
+
+    glfwSetKeyCallback(m_window, Input::key_callback);
+    glfwSetMouseButtonCallback(m_window, Input::mouse_button_callback);
+    glfwSetCursorPosCallback(m_window, Input::cursor_position_callback);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         return false;
     }
@@ -49,4 +56,6 @@ void Window::display() {
     glfwSwapBuffers(m_window);
 }
 
-} // namespace Minecraft
+void Window::close(bool value) {
+    glfwSetWindowShouldClose(m_window, value);
+}
