@@ -1,6 +1,6 @@
 [submodule "Minecraft/external/GLFW"]
 	path = Minecraft/external/GLFW
-	url = https://github.com/glfw/glfw
+	url = https://github.com/glfw/glfw.git
 [submodule "Minecraft/external/GLAD"]
 	path = Minecraft/external/GLAD
 	url = https://github.com/Dav1dde/glad.git
