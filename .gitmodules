@@ -10,3 +10,6 @@
 [submodule "Minecraft/external/SimplexNoise"]
 	path = Minecraft/external/SimplexNoise
 	url = https://github.com/SRombauts/SimplexNoise.git
+[submodule "Minecraft/external/SimplxNoise"]
+	path = Minecraft/external/SimplxNoise
+	url = https://github.com/SRombauts/SimplexNoise.git

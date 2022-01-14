@@ -2,7 +2,9 @@
 #include "Block.hpp"
 #include "Shader.hpp"
 #include "Vertex.hpp"
+
 #include <glm/glm.hpp>
+#include <string>
 
 namespace noise::utils {
 class NoiseMap;
@@ -16,8 +18,13 @@ public:
     void Update(float dt);
     void Render(Shader &shader);
 
-    void generate(int chunkX = 0, int chunkY = 0, int chunkZ = 0);
+    void generate(int chunkX = 0, int chunkY = 0, int chunkZ = 0, int seed = 0);
     void createMesh();
+
+    void serialize(const std::string &path, int chunkX, int chunkZ);
+    void deserialize(const std::string &path, int chunkX, int chunkZ);
+
+    glm::vec3 getChunkPosition() const { return m_chunkPosition; }
 
 public:
     static const int CHUNK_SIZE = 16;
@@ -27,6 +34,6 @@ private:
     unsigned int m_vao;
     int m_nrOfVertices, m_nrOfIndices;
 
-    glm::ivec3 chunkPosition;
-    Block ***m_blocks;
+    glm::ivec3 m_chunkPosition;
+    Block *m_blocks;
 };

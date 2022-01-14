@@ -14,11 +14,18 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <random>
+#include <time.h>
+
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 int main() {
+
+    srand(static_cast<unsigned int>(time(0)));
+    // int seed = (rand() % 1000) + 1;
+    int seed = 0;
     Window window(800, 600, "Minecraft!");
 
     glEnable(GL_DEPTH_TEST);
@@ -27,22 +34,24 @@ int main() {
     glClearColor(0.48f, 0.74f, 1.0f, 1.0f);
 
     Shader program("assets/shaders/default.vs", "assets/shaders/default.fs");
-    Camera3D cam(glm::vec3(0.0f, 272.0f, 0.0f));
+    Camera3D cam(glm::vec3(0.0f, 256.0f, 0.0f));
 
     // Chunk chunk;
-    // chunk.generate(heightMap);
-    // chunk.createMesh(0.f, 0.f, 256.f);
-    Chunk chunks[16];
-    for (int x = cam.getCameraPos().x - 2, i = 0; x < cam.getCameraPos().x + 2; x++) {
-        for (int z = cam.getCameraPos().z - 2; z < cam.getCameraPos().z + 2; z++, i++) {
-            chunks[i].generate(x, 0, z);
+    // chunk.generate(0.f, 0.f, 0.0f, seed);
+    Chunk chunks[64];
+    for (int x = cam.getCameraPos().x - 4, i = 0; x < cam.getCameraPos().x + 4; x++) {
+        for (int z = cam.getCameraPos().z - 4; z < cam.getCameraPos().z + 4; z++, i++) {
+            // chunks[i].generate(x, 0, z, seed);
+            chunks[i].deserialize("assets/world", x, z);
+            // chunks[i].serialize("assets/world", x, z);
+            chunks[i].createMesh();
         }
     }
 
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
 
-    projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.f);
+    projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 255.f);
 
     program.bind();
     program.setMat4fv("uModel", model);
@@ -88,8 +97,8 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texID);
 
         // chunk.Render(program);
-        for (int x = 0, i = 0; x < 4; x++) {
-            for (int z = 0; z < 4; z++, i++) {
+        for (int x = 0, i = 0; x < 8; x++) {
+            for (int z = 0; z < 8; z++, i++) {
                 chunks[i].Render(program);
             }
         }

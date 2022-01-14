@@ -1,28 +1,23 @@
 #include "Chunk.hpp"
 #include "Texture.hpp"
 
+#include <SimplexNoise.h>
 #include <cmath>
 #include <glad/glad.h>
 #include <iostream>
 #include <stb_image.h>
 
+#include <fstream>
+
+float mapRange(float val, float inMin, float inMax, float outMin, float outMax) {
+    return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
 Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0) {
-    m_blocks = new Block **[CHUNK_SIZE];
-    for (int i = 0; i < CHUNK_SIZE; i++) {
-        m_blocks[i] = new Block *[CHUNK_HEIGHT];
-        for (int j = 0; j < CHUNK_HEIGHT; j++) {
-            m_blocks[i][j] = new Block[CHUNK_SIZE];
-        }
-    }
+    m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
 }
 
 Chunk::~Chunk() {
-    for (int i = 0; i < CHUNK_SIZE; ++i) {
-        for (int j = 0; j < CHUNK_HEIGHT; ++j) {
-            delete[] m_blocks[i][j];
-        }
-        delete[] m_blocks[i];
-    }
     delete[] m_blocks;
 }
 
@@ -36,35 +31,45 @@ void Chunk::Render(Shader &shader) {
     glDrawElements(GL_TRIANGLES, m_nrOfIndices, GL_UNSIGNED_INT, 0);
 }
 
-void Chunk::generate(int chunkX, int chunkY, int chunkZ) {
-    chunkPosition = {chunkX, chunkY, chunkZ};
+void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
+    m_chunkPosition = {chunkX, chunkY, chunkZ};
 
+    SimplexNoise generator(1.0f, 0.5f, 2.0f, 0.5f);
+
+    int chunkIndex = 0;
     for (int x = 0; x < CHUNK_SIZE; x++) {
-        for (int z = 0; z < CHUNK_SIZE; z++) {
-            for (int y = 0; y < CHUNK_HEIGHT; y++) {
-                m_blocks[x][y][z].setBlockType(BlockType::Grass);
-                m_blocks[x][y][z].setActive(true);
+        for (int y = 0; y < CHUNK_HEIGHT; y++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                const float incrementSize = 300.f;
+                float heightFloat = mapRange(generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize), -1.0f, 1.0f, 0.1f, 1.0f) * CHUNK_HEIGHT - 1;
+                int height = (int)heightFloat;
+
+                m_blocks[chunkIndex].setBlockType(BlockType::Air);
+
+                if (y < height)
+                    m_blocks[chunkIndex].setBlockType(BlockType::Dirt);
+                if (y == height - 1)
+                    m_blocks[chunkIndex].setBlockType(BlockType::Grass);
+                chunkIndex++;
             }
         }
     }
-
-    createMesh();
 }
 
 void Chunk::createMesh() {
-    const float originX = chunkPosition.x * 16;
-    const float originY = chunkPosition.y * 16;
-    const float originZ = chunkPosition.z * 16;
+    const float originX = m_chunkPosition.x * 16;
+    const float originY = m_chunkPosition.y * 16;
+    const float originZ = m_chunkPosition.z * 16;
 
     const int TOTAL_CUBES = Chunk::CHUNK_SIZE * Chunk::CHUNK_SIZE * Chunk::CHUNK_HEIGHT;
     Vertex *vertices = new Vertex[TOTAL_CUBES * 24];
     unsigned int *indices = new unsigned int[TOTAL_CUBES * 36];
 
-    bool lDefault = false;
+    const bool lDefault = false;
     for (int x = 0, i = 0, j = 0, counter = 0; x < Chunk::CHUNK_SIZE; x++) {
         for (int y = 0; y < Chunk::CHUNK_HEIGHT; y++) {
             for (int z = 0; z < Chunk::CHUNK_SIZE; z++, i += 24, j += 36, counter++) {
-                if (!m_blocks[x][y][z].isActive())
+                if (m_blocks[counter].getBlockType() == BlockType::Air)
                     continue;
 
                 // clang-format off
@@ -80,19 +85,19 @@ void Chunk::createMesh() {
                 // clang-format on
 
                 bool lXNegative = lDefault;
-                if (x > 0) lXNegative = m_blocks[x - 1][y][z].isActive();
+                if (x > 0) lXNegative = m_blocks[counter - (CHUNK_HEIGHT * CHUNK_SIZE)].isActive();
                 bool lXPositive = lDefault;
-                if (x < CHUNK_SIZE - 1) lXPositive = m_blocks[x + 1][y][z].isActive();
+                if (x < CHUNK_SIZE - 1) lXPositive = m_blocks[counter + (CHUNK_HEIGHT * CHUNK_SIZE)].isActive();
                 bool lYNegative = lDefault;
-                if (y > 0) lYNegative = m_blocks[x][y - 1][z].isActive();
+                if (y > 0) lYNegative = m_blocks[counter - CHUNK_SIZE].isActive();
                 bool lYPositive = lDefault;
-                if (y < CHUNK_HEIGHT - 1) lYPositive = m_blocks[x][y + 1][z].isActive();
+                if (y < CHUNK_HEIGHT - 1) lYPositive = m_blocks[counter + CHUNK_SIZE].isActive();
                 bool lZNegative = lDefault;
-                if (z > 0) lZNegative = m_blocks[x][y][z - 1].isActive();
+                if (z > 0) lZNegative = m_blocks[counter - 1].isActive();
                 bool lZPositive = lDefault;
-                if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[x][y][z + 1].isActive();
+                if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[counter + 1].isActive();
 
-                Texture tex(m_blocks[x][y][z].getBlockType());
+                Texture tex(m_blocks[counter].getBlockType());
 
                 int uvIndex = counter * 24;
                 for (int i = 0; i < 6; i++) {
@@ -192,4 +197,30 @@ void Chunk::createMesh() {
 
     delete[] vertices;
     delete[] indices;
+}
+
+void Chunk::serialize(const std::string &path, int chunkX, int chunkZ) {
+    std::string filePath = path + "/" + std::to_string(chunkX) + "_" + std::to_string(chunkZ) + ".bin";
+    FILE *fp = std::fopen(filePath.c_str(), "wb");
+    if (!fp) {
+        std::printf("ERROR::CHUNK_CPP::SERIALIZE::COUDL_NOT_CREATE_FILE -> %s\n", filePath);
+    }
+
+    fwrite(&chunkX, sizeof(int), 1, fp);
+    fwrite(&chunkZ, sizeof(int), 1, fp);
+    fwrite(m_blocks, sizeof(Block) * (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT), 1, fp);
+    fclose(fp);
+}
+void Chunk::deserialize(const std::string &path, int chunkX, int chunkZ) {
+    std::string filePath = path + "/" + std::to_string(chunkX) + "_" + std::to_string(chunkZ) + ".bin";
+    FILE *fp = std::fopen(filePath.c_str(), "rb");
+    if (!fp) {
+        std::printf("ERROR::CHUNK_CPP::DESERIALIZE::COUDL_NOT_READ_FILE -> %s\n", filePath);
+    }
+
+    fread(&m_chunkPosition.x, sizeof(int), 1, fp);
+    fread(&m_chunkPosition.z, sizeof(int), 1, fp);
+    m_chunkPosition.y = 0;
+    fread(m_blocks, sizeof(Block) * (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT), 1, fp);
+    fclose(fp);
 }
