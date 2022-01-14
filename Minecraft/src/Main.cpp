@@ -42,8 +42,8 @@ int main() {
     for (int x = cam.getCameraPos().x - 4, i = 0; x < cam.getCameraPos().x + 4; x++) {
         for (int z = cam.getCameraPos().z - 4; z < cam.getCameraPos().z + 4; z++, i++) {
             // chunks[i].generate(x, 0, z, seed);
-            chunks[i].deserialize("assets/world", x, z);
             // chunks[i].serialize("assets/world", x, z);
+            chunks[i].deserialize("assets/world", x, z);
             chunks[i].createMesh();
         }
     }

@@ -215,7 +215,7 @@ void Chunk::deserialize(const std::string &path, int chunkX, int chunkZ) {
     std::string filePath = path + "/" + std::to_string(chunkX) + "_" + std::to_string(chunkZ) + ".bin";
     FILE *fp = std::fopen(filePath.c_str(), "rb");
     if (!fp) {
-        std::printf("ERROR::CHUNK_CPP::DESERIALIZE::COUDL_NOT_READ_FILE -> %s\n", filePath);
+        std::printf("ERROR::CHUNK_CPP::DESERIALIZE::COUDL_NOT_READ_FILE -> %s\n", filePath.data());
     }
 
     fread(&m_chunkPosition.x, sizeof(int), 1, fp);
