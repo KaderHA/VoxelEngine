@@ -80,7 +80,8 @@ int main() {
     stbi_image_free(data);
 
     while (window.isOpen()) {
-        if (Input::isKeyPressed(GLFW_KEY_ESCAPE)) window.close(true);
+        if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
+            window.close(true);
         window.pollEvents();
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;

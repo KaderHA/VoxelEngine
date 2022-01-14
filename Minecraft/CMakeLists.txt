@@ -1,6 +1,6 @@
 add_subdirectory(external)
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/include/*.hpp" "src/include/*.h")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
