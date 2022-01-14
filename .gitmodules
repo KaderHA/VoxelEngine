@@ -7,3 +7,6 @@
 [submodule "Minecraft/external/GLM"]
 	path = Minecraft/external/GLM
 	url = https://github.com/g-truc/glm.git
+[submodule "Minecraft/external/SimplexNoise"]
+	path = Minecraft/external/SimplexNoise
+	url = https://github.com/SRombauts/SimplexNoise.git
