@@ -6,6 +6,7 @@ enum BlockType {
     Grass,
     Dirt,
     Stone,
+    Bedrock
 };
 
 class Block {
@@ -15,7 +16,7 @@ public:
 
     // Getter
     bool isActive() const { return m_id != 0; }
-    BlockType getBlockType() const { return static_cast<BlockType>(m_id); }
+    inline BlockType getBlockType() const { return static_cast<BlockType>(m_id); }
 
     // Setters
     void setActive(bool active);

@@ -58,6 +58,8 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
 
                 if (y < height)
                     m_blocks[chunkIndex].setBlockType(BlockType::Dirt);
+                if (y == 0)
+                    m_blocks[chunkIndex].setBlockType(BlockType::Bedrock);
                 if (y == height - 1)
                     m_blocks[chunkIndex].setBlockType(BlockType::Grass);
                 chunkIndex++;
