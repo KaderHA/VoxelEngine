@@ -72,22 +72,23 @@ void Chunk::createMesh(TextureAtlas &tex) {
     unsigned int *indices = new unsigned int[TOTAL_CUBES * 36];
 
     const bool lDefault = false;
-    for (int x = 0, i = 0, j = 0, counter = 0; x < Chunk::CHUNK_SIZE; x++) {
+    for (int x = 0, i = 0, j = 0, vertexArrayIndex = 0, counter = 0; x < Chunk::CHUNK_SIZE; x++) {
         for (int y = 0; y < Chunk::CHUNK_HEIGHT; y++) {
-            for (int z = 0; z < Chunk::CHUNK_SIZE; z++, i += 24, j += 36, counter++) {
+            for (int z = 0; z < Chunk::CHUNK_SIZE; z++, i += 24, counter++) {
                 if (m_blocks[counter].getBlockType() == BlockType::Air)
                     continue;
 
                 // clang-format off
-                Vertex v1 = {setupVertexData(glm::uvec3(x + 1, y + 1, z + 1), m_blocks[counter].getBlockType()), 1.0f, 1.0f};
-                Vertex v2 = {setupVertexData(glm::uvec3(x + 1, y, z + 1), m_blocks[counter].getBlockType()), 1.0f, 0.0f};
-                Vertex v3 = {setupVertexData(glm::uvec3(x, y, z + 1), m_blocks[counter].getBlockType()), 0.0f, 0.0f};
-                Vertex v4 = {setupVertexData(glm::uvec3(x, y + 1, z + 1), m_blocks[counter].getBlockType()), 0.0f, 1.0f};
+                std::vector<Vertex> cubeVertices;
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z + 1), m_blocks[counter].getBlockType()), 1.0f, 1.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z + 1), m_blocks[counter].getBlockType()), 1.0f, 0.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z + 1), m_blocks[counter].getBlockType()), 0.0f, 0.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z + 1), m_blocks[counter].getBlockType()), 0.0f, 1.0f});
 
-                Vertex v5 = {setupVertexData(glm::uvec3(x + 1, y + 1, z), m_blocks[counter].getBlockType()), 1.0f, 1.0f};
-                Vertex v6 = {setupVertexData(glm::uvec3(x + 1, y, z), m_blocks[counter].getBlockType()), 1.0f, 0.0f};
-                Vertex v7 = {setupVertexData(glm::uvec3(x, y, z), m_blocks[counter].getBlockType()), 0.0f, 0.0f};
-                Vertex v8 = {setupVertexData(glm::uvec3(x, y + 1, z), m_blocks[counter].getBlockType()) , 0.0f, 1.0f};
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z), m_blocks[counter].getBlockType()), 1.0f, 1.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z), m_blocks[counter].getBlockType()), 1.0f, 0.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z), m_blocks[counter].getBlockType()), 0.0f, 0.0f});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z), m_blocks[counter].getBlockType()) , 0.0f, 1.0f});
                 // clang-format on
                 bool lXNegative = lDefault;
                 if (x > 0) lXNegative = m_blocks[counter - (CHUNK_HEIGHT * CHUNK_SIZE)].isActive();
@@ -102,71 +103,25 @@ void Chunk::createMesh(TextureAtlas &tex) {
                 bool lZPositive = lDefault;
                 if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[counter + 1].isActive();
 
+                int faceCount = abs((lXPositive + lXNegative + lYPositive + lYNegative + lZPositive + lZNegative) - 6);
+
                 TextureFormat blockFormat = tex.getUVS(m_blocks[counter].getBlockType());
 
-                // Top
-                if (!lYPositive) {
-                    vertices[i + 0].data |= v1.data;
-                    vertices[i + 1].data |= v5.data;
-                    vertices[i + 2].data |= v8.data;
-                    vertices[i + 3].data |= v4.data;
-                }
+                if (!lYPositive)
+                    createFace(vertices, vertexArrayIndex, CubeFace::TOP, cubeVertices, blockFormat);
+                if (!lZNegative)
+                    createFace(vertices, vertexArrayIndex, CubeFace::BACK, cubeVertices, blockFormat);
+                if (!lXNegative)
+                    createFace(vertices, vertexArrayIndex, CubeFace::LEFT, cubeVertices, blockFormat);
+                if (!lXPositive)
+                    createFace(vertices, vertexArrayIndex, CubeFace::RIGHT, cubeVertices, blockFormat);
+                if (!lZPositive)
+                    createFace(vertices, vertexArrayIndex, CubeFace::FRONT, cubeVertices, blockFormat);
+                if (!lYNegative)
+                    createFace(vertices, vertexArrayIndex, CubeFace::BOTTOM, cubeVertices, blockFormat);
 
-                // Back
-                if (!lZNegative) {
-                    vertices[i + 4].data |= v5.data;
-                    vertices[i + 5].data |= v6.data;
-                    vertices[i + 6].data |= v7.data;
-                    vertices[i + 7].data |= v8.data;
-                }
-
-                // Left
-                if (!lXNegative) {
-                    vertices[i + 8].data |= v8.data;
-                    vertices[i + 9].data |= v7.data;
-                    vertices[i + 10].data |= v3.data;
-                    vertices[i + 11].data |= v4.data;
-                }
-
-                // Right
-                if (!lXPositive) {
-                    vertices[i + 12].data |= v1.data;
-                    vertices[i + 13].data |= v2.data;
-                    vertices[i + 14].data |= v6.data;
-                    vertices[i + 15].data |= v5.data;
-                }
-
-                // Front
-                if (!lZPositive) {
-                    vertices[i + 16].data |= v4.data;
-                    vertices[i + 17].data |= v3.data;
-                    vertices[i + 18].data |= v2.data;
-                    vertices[i + 19].data |= v1.data;
-                }
-
-                // Bottom
-                if (!lYNegative) {
-                    vertices[i + 20].data |= v3.data;
-                    vertices[i + 21].data |= v7.data;
-                    vertices[i + 22].data |= v6.data;
-                    vertices[i + 23].data |= v2.data;
-                }
-
-                int vertexOffset = counter * 24, elementOffset = counter * 24;
-                for (unsigned int i = 0; i < 6; i++) {
-                    CubeFace face = static_cast<CubeFace>(i);
-                    TextureUVS texture = face == CubeFace::TOP      ? blockFormat.top
-                                         : face == CubeFace::BOTTOM ? blockFormat.bottom
-                                                                    : blockFormat.side;
-                    vertices[vertexOffset + (i * 4) + 0].uv = texture.uvs[0];
-                    vertices[vertexOffset + (i * 4) + 1].uv = texture.uvs[1];
-                    vertices[vertexOffset + (i * 4) + 2].uv = texture.uvs[2];
-                    vertices[vertexOffset + (i * 4) + 3].uv = texture.uvs[3];
-
-                    vertices[vertexOffset + (i * 4) + 0].data |= ((i << 19) & 0x380000);
-                    vertices[vertexOffset + (i * 4) + 1].data |= ((i << 19) & 0x380000);
-                    vertices[vertexOffset + (i * 4) + 2].data |= ((i << 19) & 0x380000);
-                    vertices[vertexOffset + (i * 4) + 3].data |= ((i << 19) & 0x380000);
+                int vertexOffset = counter * 24, elementOffset = vertexArrayIndex - (4 * faceCount);
+                for (unsigned int i = 0; i < faceCount; i++) {
 
                     indices[j + (i * 6) + 0] = elementOffset + 0;
                     indices[j + (i * 6) + 1] = elementOffset + 1;
@@ -177,8 +132,10 @@ void Chunk::createMesh(TextureAtlas &tex) {
                     indices[j + (i * 6) + 5] = elementOffset + 3;
                     elementOffset += 4;
                 }
+                j += 6 * faceCount;
             }
         }
+        m_nrOfVertices = vertexArrayIndex;
     }
 
     glGenVertexArrays(1, &m_vao);
@@ -186,7 +143,7 @@ void Chunk::createMesh(TextureAtlas &tex) {
     unsigned int vbo, ebo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, (24 * sizeof(Vertex)) * TOTAL_CUBES, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_nrOfVertices * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(Vertex), (void *)offsetof(Vertex, data));
@@ -209,7 +166,7 @@ void Chunk::createMesh(TextureAtlas &tex) {
     delete[] indices;
 }
 
-uint32_t Chunk::setupVertexData(const glm::uvec3 &position, BlockType type) {
+uint32_t Chunk::packData(const glm::uvec3 &position, BlockType type) {
     uint32_t data = 0;
 
     data |= (position.x & 0x1F);
@@ -217,6 +174,63 @@ uint32_t Chunk::setupVertexData(const glm::uvec3 &position, BlockType type) {
     data |= ((position.z << 14) & 0x7C000);
     // data |= ((static_cast<uint16_t>(type) << 19) & 0xFFF0000);
     return data;
+}
+
+void Chunk::createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace face, const std::vector<Vertex> &cubeVertices, const TextureFormat &blockFormat) {
+    TextureUVS texture = face == CubeFace::TOP      ? blockFormat.top
+                         : face == CubeFace::BOTTOM ? blockFormat.bottom
+                                                    : blockFormat.side;
+    vertices[vertexArrayIndex + 0].uv = texture.uvs[0];
+    vertices[vertexArrayIndex + 1].uv = texture.uvs[1];
+    vertices[vertexArrayIndex + 2].uv = texture.uvs[2];
+    vertices[vertexArrayIndex + 3].uv = texture.uvs[3];
+
+    vertices[vertexArrayIndex + 0].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 1].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 2].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 3].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+
+    switch (face) {
+    case CubeFace::TOP:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+        break;
+    case CubeFace::BACK:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+        break;
+    case CubeFace::LEFT:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+        break;
+    case CubeFace::RIGHT:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+        break;
+    case CubeFace::FRONT:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+        break;
+    case CubeFace::BOTTOM:
+        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+        break;
+
+    default:
+        break;
+    }
 }
 
 void Chunk::serialize(const std::string &path, int chunkX, int chunkZ) {

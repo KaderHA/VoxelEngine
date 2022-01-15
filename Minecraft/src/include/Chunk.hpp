@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <vector>
 
 enum class CubeFace {
     TOP = 0,
@@ -33,7 +34,8 @@ public:
     glm::vec3 getChunkPosition() const { return m_chunkPosition; }
 
 private:
-    uint32_t setupVertexData(const glm::uvec3 &position, BlockType type);
+    void createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace face, const std::vector<Vertex> &cubeVertices, const TextureFormat &blockFormat);
+    uint32_t packData(const glm::uvec3 &position, BlockType type);
 
 public:
     static const int CHUNK_SIZE = 16;
