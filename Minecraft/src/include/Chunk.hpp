@@ -32,6 +32,9 @@ public:
 
     glm::vec3 getChunkPosition() const { return m_chunkPosition; }
 
+private:
+    uint32_t setupVertexData(const glm::uvec3 &position, BlockType type);
+
 public:
     static const int CHUNK_SIZE = 16;
     static const int CHUNK_HEIGHT = 256;

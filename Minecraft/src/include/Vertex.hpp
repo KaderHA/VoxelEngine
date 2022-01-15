@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct UV {
     float u, v;
@@ -9,11 +10,6 @@ struct TextureUVS {
 };
 
 struct Vertex {
-    struct Position {
-        float x, y, z;
-    } position;
-    struct Normal {
-        float x, y, z;
-    } normal;
+    uint32_t data;
     UV uv;
 };

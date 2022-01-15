@@ -85,7 +85,7 @@ unsigned int Shader::loadShader(unsigned int type, const char *filename) {
         const char *shaderType = type == GL_VERTEX_SHADER ? "VERTEX_SHADER" : type == GL_FRAGMENT_SHADER ? "FRAGMENT_SHADER"
                                                                                                          : "GEOMETRY_SHADER";
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        std::printf("ERROR::LOADSHADERS::COULD_NOT_COMPILE_%s", shaderType);
+        std::printf("ERROR::LOADSHADERS::COULD_NOT_COMPILE_%s\n", shaderType);
         std::printf("%s\n", infoLog);
         return 0;
     }

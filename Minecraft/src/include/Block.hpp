@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-enum BlockType {
+enum class BlockType : uint16_t {
     Air = 0,
     Grass,
     Dirt,
@@ -23,7 +23,7 @@ public:
     void setBlockType(BlockType blockType);
 
 private:
-    int16_t m_id;
+    uint16_t m_id;
     int16_t m_light;
     int32_t m_padding;
 };

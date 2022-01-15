@@ -24,6 +24,7 @@ float lastFrame = 0.0f;
 
 int main() {
 
+    const int CHUNK_RADIUS = 4;
     srand(static_cast<unsigned int>(time(0)));
     // int seed = (rand() % 1000) + 1;
     int seed = 0;
@@ -36,16 +37,16 @@ int main() {
 
     Shader program("assets/shaders/default.vs", "assets/shaders/default.fs");
     Camera3D cam(glm::vec3(0.0f, Chunk::CHUNK_HEIGHT + 16, 0.0f));
-    TextureAtlas textureAtlas("assets/images/terrain_atlas.png");
+    TextureAtlas textureAtlas("assets/images/terrain.png");
 
     // Chunk chunk;
     // chunk.generate(0.f, 0.f, 0.0f, seed);
-    Chunk chunks[16];
-    for (int x = cam.getCameraPos().x - 2, i = 0; x < cam.getCameraPos().x + 2; x++) {
-        for (int z = cam.getCameraPos().z - 2; z < cam.getCameraPos().z + 2; z++, i++) {
+    Chunk chunks[((CHUNK_RADIUS * 2) * (CHUNK_RADIUS * 2))];
+    for (int x = cam.getCameraPos().x - CHUNK_RADIUS, i = 0; x < cam.getCameraPos().x + CHUNK_RADIUS; x++) {
+        for (int z = cam.getCameraPos().z - CHUNK_RADIUS; z < cam.getCameraPos().z + CHUNK_RADIUS; z++, i++) {
             chunks[i].generate(x, 0, z, seed);
-            chunks[i].serialize("assets/world", x, z);
-            chunks[i].deserialize("assets/world", x, z);
+            // chunks[i].serialize("assets/world", x, z);
+            // chunks[i].deserialize("assets/world", x, z);
             chunks[i].createMesh(textureAtlas);
         }
     }
@@ -84,8 +85,8 @@ int main() {
         program.setVec3fv("uLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
 
         // chunk.Render(program);
-        for (int x = 0, i = 0; x < 4; x++) {
-            for (int z = 0; z < 4; z++, i++) {
+        for (int x = 0, i = 0; x < (CHUNK_RADIUS * 2); x++) {
+            for (int z = 0; z < (CHUNK_RADIUS * 2); z++, i++) {
                 chunks[i].Render(program);
             }
         }
