@@ -10,6 +10,15 @@ namespace noise::utils {
 class NoiseMap;
 }
 
+enum class CubeFace {
+    TOP = 0,
+    BACK,
+    LEFT,
+    RIGHT,
+    FRONT,
+    BOTTOM
+};
+
 class Chunk {
 public:
     Chunk();

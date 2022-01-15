@@ -13,6 +13,16 @@ float mapRange(float val, float inMin, float inMax, float outMin, float outMax) 
     return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
+Vertex::Normal getNormal(CubeFace face) {
+    if (face == CubeFace::TOP) return {0.0f, 1.0f, 0.0f};
+    if (face == CubeFace::BACK) return {0.0f, 0.0f, -1.0f};
+    if (face == CubeFace::LEFT) return {-1.0f, 0.0f, 0.0f};
+    if (face == CubeFace::RIGHT) return {1.0f, 0.0f, 0.0f};
+    if (face == CubeFace::FRONT) return {0.0f, 0.0f, 1.0f};
+    if (face == CubeFace::BOTTOM) return {0.0f, -1.0f, 0.0f};
+    return {0.0f, 0.0f, 0.0f};
+}
+
 Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0) {
     m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
 }
@@ -41,7 +51,7 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 const float incrementSize = 300.f;
-                float heightFloat = mapRange(generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize), -1.0f, 1.0f, 0.1f, 1.0f) * CHUNK_HEIGHT - 1;
+                float heightFloat = mapRange(generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize), -1.0f, 1.0f, 0.1f, 1.0f) * (CHUNK_HEIGHT - 1);
                 int height = (int)heightFloat;
 
                 m_blocks[chunkIndex].setBlockType(BlockType::Air);
@@ -99,22 +109,30 @@ void Chunk::createMesh() {
 
                 Texture tex(m_blocks[counter].getBlockType());
 
-                int uvIndex = counter * 24;
+                int vertexOffset = counter * 24;
                 for (int i = 0; i < 6; i++) {
-                    TextureUVS texture = i == 0 ? tex.getUVS().top : i < 5 ? tex.getUVS().side
-                                                                           : tex.getUVS().bottom;
-                    vertices[uvIndex + (i * 4) + 0].uv = texture.uvs[0];
-                    vertices[uvIndex + (i * 4) + 1].uv = texture.uvs[1];
-                    vertices[uvIndex + (i * 4) + 2].uv = texture.uvs[2];
-                    vertices[uvIndex + (i * 4) + 3].uv = texture.uvs[3];
+                    CubeFace face = static_cast<CubeFace>(i);
+                    TextureUVS texture = face == CubeFace::TOP      ? tex.getUVS().top
+                                         : face == CubeFace::BOTTOM ? tex.getUVS().bottom
+                                                                    : tex.getUVS().side;
+                    vertices[vertexOffset + (i * 4) + 0].uv = texture.uvs[0];
+                    vertices[vertexOffset + (i * 4) + 1].uv = texture.uvs[1];
+                    vertices[vertexOffset + (i * 4) + 2].uv = texture.uvs[2];
+                    vertices[vertexOffset + (i * 4) + 3].uv = texture.uvs[3];
+
+                    Vertex::Normal normal = getNormal(static_cast<CubeFace>(i));
+                    vertices[vertexOffset + (i * 4) + 0].normal = normal;
+                    vertices[vertexOffset + (i * 4) + 1].normal = normal;
+                    vertices[vertexOffset + (i * 4) + 2].normal = normal;
+                    vertices[vertexOffset + (i * 4) + 3].normal = normal;
                 }
 
-                // Front
-                if (!lZPositive) {
-                    vertices[i + 16].position = v4.position;
-                    vertices[i + 17].position = v3.position;
-                    vertices[i + 18].position = v2.position;
-                    vertices[i + 19].position = v1.position;
+                // Top
+                if (!lYPositive) {
+                    vertices[i + 0].position = v1.position;
+                    vertices[i + 1].position = v5.position;
+                    vertices[i + 2].position = v8.position;
+                    vertices[i + 3].position = v4.position;
                 }
 
                 // Back
@@ -141,12 +159,12 @@ void Chunk::createMesh() {
                     vertices[i + 15].position = v5.position;
                 }
 
-                // Top
-                if (!lYPositive) {
-                    vertices[i + 0].position = v1.position;
-                    vertices[i + 1].position = v5.position;
-                    vertices[i + 2].position = v8.position;
-                    vertices[i + 3].position = v4.position;
+                // Front
+                if (!lZPositive) {
+                    vertices[i + 16].position = v4.position;
+                    vertices[i + 17].position = v3.position;
+                    vertices[i + 18].position = v2.position;
+                    vertices[i + 19].position = v1.position;
                 }
 
                 // Bottom
@@ -181,8 +199,12 @@ void Chunk::createMesh() {
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(offsetof(Vertex, normal)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(3 * sizeof(float)));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(offsetof(Vertex, uv)));
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);

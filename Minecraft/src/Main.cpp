@@ -34,15 +34,15 @@ int main() {
     glClearColor(0.48f, 0.74f, 1.0f, 1.0f);
 
     Shader program("assets/shaders/default.vs", "assets/shaders/default.fs");
-    Camera3D cam(glm::vec3(0.0f, 256.0f, 0.0f));
+    Camera3D cam(glm::vec3(0.0f, Chunk::CHUNK_HEIGHT + 16, 0.0f));
 
     // Chunk chunk;
     // chunk.generate(0.f, 0.f, 0.0f, seed);
-    Chunk chunks[64];
-    for (int x = cam.getCameraPos().x - 4, i = 0; x < cam.getCameraPos().x + 4; x++) {
-        for (int z = cam.getCameraPos().z - 4; z < cam.getCameraPos().z + 4; z++, i++) {
-            // chunks[i].generate(x, 0, z, seed);
-            // chunks[i].serialize("assets/world", x, z);
+    Chunk chunks[16];
+    for (int x = cam.getCameraPos().x - 2, i = 0; x < cam.getCameraPos().x + 2; x++) {
+        for (int z = cam.getCameraPos().z - 2; z < cam.getCameraPos().z + 2; z++, i++) {
+            chunks[i].generate(x, 0, z, seed);
+            chunks[i].serialize("assets/world", x, z);
             chunks[i].deserialize("assets/world", x, z);
             chunks[i].createMesh();
         }
@@ -97,9 +97,16 @@ int main() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texID);
 
+        // Lighting
+        program.setVec3fv("uLight.direction", glm::vec3(0.2f, -1.0f, -0.5f));
+
+        // light properties
+        program.setVec3fv("uLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+        program.setVec3fv("uLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
+
         // chunk.Render(program);
-        for (int x = 0, i = 0; x < 8; x++) {
-            for (int z = 0; z < 8; z++, i++) {
+        for (int x = 0, i = 0; x < 4; x++) {
+            for (int z = 0; z < 4; z++, i++) {
                 chunks[i].Render(program);
             }
         }

@@ -12,6 +12,8 @@ struct Vertex {
     struct Position {
         float x, y, z;
     } position;
-
+    struct Normal {
+        float x, y, z;
+    } normal;
     UV uv;
 };
