@@ -1,5 +1,4 @@
 #include "Chunk.hpp"
-#include "Texture.hpp"
 
 #include <SimplexNoise.h>
 #include <cmath>
@@ -68,7 +67,7 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
     }
 }
 
-void Chunk::createMesh() {
+void Chunk::createMesh(TextureAtlas &tex) {
     const float originX = m_chunkPosition.x * 16;
     const float originY = m_chunkPosition.y * 16;
     const float originZ = m_chunkPosition.z * 16;
@@ -109,14 +108,14 @@ void Chunk::createMesh() {
                 bool lZPositive = lDefault;
                 if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[counter + 1].isActive();
 
-                Texture tex(m_blocks[counter].getBlockType());
+                TextureFormat blockFormat = tex.getUVS(m_blocks[counter].getBlockType());
 
                 int vertexOffset = counter * 24;
                 for (int i = 0; i < 6; i++) {
                     CubeFace face = static_cast<CubeFace>(i);
-                    TextureUVS texture = face == CubeFace::TOP      ? tex.getUVS().top
-                                         : face == CubeFace::BOTTOM ? tex.getUVS().bottom
-                                                                    : tex.getUVS().side;
+                    TextureUVS texture = face == CubeFace::TOP      ? blockFormat.top
+                                         : face == CubeFace::BOTTOM ? blockFormat.bottom
+                                                                    : blockFormat.side;
                     vertices[vertexOffset + (i * 4) + 0].uv = texture.uvs[0];
                     vertices[vertexOffset + (i * 4) + 1].uv = texture.uvs[1];
                     vertices[vertexOffset + (i * 4) + 2].uv = texture.uvs[2];

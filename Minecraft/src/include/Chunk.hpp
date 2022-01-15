@@ -1,14 +1,11 @@
 #pragma once
 #include "Block.hpp"
 #include "Shader.hpp"
+#include "TextureAtlas.hpp"
 #include "Vertex.hpp"
 
 #include <glm/glm.hpp>
 #include <string>
-
-namespace noise::utils {
-class NoiseMap;
-}
 
 enum class CubeFace {
     TOP = 0,
@@ -28,7 +25,7 @@ public:
     void Render(Shader &shader);
 
     void generate(int chunkX = 0, int chunkY = 0, int chunkZ = 0, int seed = 0);
-    void createMesh();
+    void createMesh(TextureAtlas &tex);
 
     void serialize(const std::string &path, int chunkX, int chunkZ);
     void deserialize(const std::string &path, int chunkX, int chunkZ);

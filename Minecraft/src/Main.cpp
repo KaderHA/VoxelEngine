@@ -8,6 +8,7 @@
 #include "Chunk.hpp"
 #include "Input.hpp"
 #include "Shader.hpp"
+#include "TextureAtlas.hpp"
 #include "Vertex.hpp"
 #include "Window.hpp"
 
@@ -35,6 +36,7 @@ int main() {
 
     Shader program("assets/shaders/default.vs", "assets/shaders/default.fs");
     Camera3D cam(glm::vec3(0.0f, Chunk::CHUNK_HEIGHT + 16, 0.0f));
+    TextureAtlas textureAtlas("assets/images/terrain_atlas.png");
 
     // Chunk chunk;
     // chunk.generate(0.f, 0.f, 0.0f, seed);
@@ -44,7 +46,7 @@ int main() {
             chunks[i].generate(x, 0, z, seed);
             chunks[i].serialize("assets/world", x, z);
             chunks[i].deserialize("assets/world", x, z);
-            chunks[i].createMesh();
+            chunks[i].createMesh(textureAtlas);
         }
     }
 
@@ -56,28 +58,6 @@ int main() {
     program.bind();
     program.setMat4fv("uModel", model);
     program.setMat4fv("uProjection", projection);
-
-    unsigned int texID;
-    glGenTextures(1, &texID);
-    glBindTexture(GL_TEXTURE_2D, texID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    stbi_set_flip_vertically_on_load(true);
-
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load("assets/images/terrain_atlas.png", &width, &height, &nrChannels, 0);
-
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cout << "Failed to load texture" << '\n';
-    }
-    stbi_image_free(data);
 
     while (window.isOpen()) {
         if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
@@ -94,8 +74,7 @@ int main() {
         program.setMat4fv("uView", cam.getViewMatrix());
 
         program.set1i("uTexture", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texID);
+        textureAtlas.bind(0);
 
         // Lighting
         program.setVec3fv("uLight.direction", glm::vec3(0.2f, -1.0f, -0.5f));
