@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 flat in uint fFace;
 in vec2 fTexCoord;

@@ -24,7 +24,7 @@ float lastFrame = 0.0f;
 
 int main() {
 
-    const int CHUNK_RADIUS = 4;
+    const int CHUNK_RADIUS = 8;
     srand(static_cast<unsigned int>(time(0)));
     // int seed = (rand() % 1000) + 1;
     int seed = 0;
@@ -44,8 +44,8 @@ int main() {
     Chunk chunks[((CHUNK_RADIUS * 2) * (CHUNK_RADIUS * 2))];
     for (int x = cam.getCameraPos().x - CHUNK_RADIUS, i = 0; x < cam.getCameraPos().x + CHUNK_RADIUS; x++) {
         for (int z = cam.getCameraPos().z - CHUNK_RADIUS; z < cam.getCameraPos().z + CHUNK_RADIUS; z++, i++) {
-            // chunks[i].generate(x, 0, z, seed);
-            // chunks[i].serialize("assets/world", x, z);
+            chunks[i].generate(x, 0, z, seed);
+            chunks[i].serialize("assets/world", x, z);
             chunks[i].deserialize("assets/world", x, z);
             chunks[i].createMesh(textureAtlas);
         }
@@ -75,7 +75,8 @@ int main() {
         program.setMat4fv("uView", cam.getViewMatrix());
 
         program.set1i("uTexture", 0);
-        textureAtlas.bind(0);
+        program.set1i("uTexUV", 1);
+        textureAtlas.bind(GL_TEXTURE0);
 
         // Lighting
         program.setVec3fv("uLight.direction", glm::vec3(0.2f, -1.0f, -0.5f));

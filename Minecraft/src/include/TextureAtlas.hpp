@@ -3,9 +3,9 @@
 #include "Vertex.hpp"
 
 struct TextureFormat {
-    TextureUVS top;
-    TextureUVS side;
-    TextureUVS bottom;
+    uint32_t top;
+    uint32_t side;
+    uint32_t bottom;
 };
 
 class TextureAtlas {
@@ -20,9 +20,9 @@ public:
     TextureFormat getUVS(BlockType type);
 
 private:
-    unsigned int m_ID;
+    unsigned int m_ID, m_uvID, m_tempID;
     int m_width, m_height, m_nrChannel;
 
-    TextureUVS *m_uvArray;
+    float *m_uvArray;
     TextureFormat m_textureFormat;
 };
