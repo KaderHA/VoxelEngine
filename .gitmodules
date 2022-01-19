@@ -10,3 +10,6 @@
 [submodule "Minecraft/external/SimplexNoise"]
 	path = Minecraft/external/SimplexNoise
 	url = https://github.com/SRombauts/SimplexNoise.git
+[submodule "Minecraft/external/spdlog"]
+	path = Minecraft/external/spdlog
+	url = https://github.com/gabime/spdlog.git

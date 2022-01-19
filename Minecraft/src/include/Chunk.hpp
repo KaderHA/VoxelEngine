@@ -27,6 +27,7 @@ public:
 
     void generate(int chunkX = 0, int chunkY = 0, int chunkZ = 0, int seed = 0);
     void createMesh(TextureAtlas &tex);
+    void uploadToGPU(Vertex *vertices);
 
     void serialize(const std::string &path, int chunkX, int chunkZ);
     void deserialize(const std::string &path, int chunkX, int chunkZ);

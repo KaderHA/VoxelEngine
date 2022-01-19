@@ -122,7 +122,11 @@ void Chunk::createMesh(TextureAtlas &tex) {
         }
     }
     m_nrOfVertices = vertexArrayIndex;
+    uploadToGPU(vertices);
+    delete[] vertices;
+}
 
+void Chunk::uploadToGPU(Vertex *vertices) {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
     unsigned int vbo;
@@ -135,8 +139,6 @@ void Chunk::createMesh(TextureAtlas &tex) {
 
     glBindVertexArray(0);
     glDeleteBuffers(1, &vbo);
-
-    delete[] vertices;
 }
 
 uint32_t Chunk::packData(const glm::uvec3 &position, BlockType type) {

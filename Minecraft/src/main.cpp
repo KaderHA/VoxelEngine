@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "Chunk.hpp"
 #include "Input.hpp"
+#include "Log.hpp"
 #include "Shader.hpp"
 #include "TextureAtlas.hpp"
 #include "Vertex.hpp"
@@ -23,8 +24,9 @@ float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 int main() {
-
-    const int CHUNK_RADIUS = 16;
+    Log::init();
+    Log::getLogger()->error("Logger initialized");
+    const int CHUNK_RADIUS = 8;
     srand(static_cast<unsigned int>(time(0)));
     // int seed = (rand() % 1000) + 1;
     int seed = 0;
