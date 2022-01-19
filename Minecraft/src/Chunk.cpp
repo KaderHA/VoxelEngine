@@ -154,21 +154,21 @@ void Chunk::createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace f
                        : face == CubeFace::BOTTOM ? blockFormat.bottom
                                                   : blockFormat.side;
 
-    vertices[vertexArrayIndex + 0].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
-    vertices[vertexArrayIndex + 1].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
-    vertices[vertexArrayIndex + 2].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 0].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 1].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 2].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
 
-    vertices[vertexArrayIndex + 3].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
-    vertices[vertexArrayIndex + 4].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
-    vertices[vertexArrayIndex + 5].data |= ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 3].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 4].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
+    vertices[vertexArrayIndex + 5].data = ((static_cast<int32_t>(face) << 19) & 0x380000);
 
-    vertices[vertexArrayIndex + 0].data |= ((0 << 22) & 0xC00000);
-    vertices[vertexArrayIndex + 1].data |= ((1 << 22) & 0xC00000);
-    vertices[vertexArrayIndex + 2].data |= ((2 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 0].data |= (((uint16_t)0 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 1].data |= (((uint16_t)1 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 2].data |= (((uint16_t)2 << 22) & 0xC00000);
 
-    vertices[vertexArrayIndex + 3].data |= ((0 << 22) & 0xC00000);
-    vertices[vertexArrayIndex + 4].data |= ((2 << 22) & 0xC00000);
-    vertices[vertexArrayIndex + 5].data |= ((3 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 3].data |= (((uint16_t)0 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 4].data |= (((uint16_t)2 << 22) & 0xC00000);
+    vertices[vertexArrayIndex + 5].data |= (((uint16_t)3 << 22) & 0xC00000);
 
     vertices[vertexArrayIndex + 0].data |= ((texture << 24) & 0xFF000000);
     vertices[vertexArrayIndex + 1].data |= ((texture << 24) & 0xFF000000);

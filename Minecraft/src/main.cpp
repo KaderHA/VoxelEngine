@@ -24,7 +24,7 @@ float lastFrame = 0.0f;
 
 int main() {
 
-    const int CHUNK_RADIUS = 8;
+    const int CHUNK_RADIUS = 16;
     srand(static_cast<unsigned int>(time(0)));
     // int seed = (rand() % 1000) + 1;
     int seed = 0;
@@ -46,7 +46,7 @@ int main() {
         for (int z = cam.getCameraPos().z - CHUNK_RADIUS; z < cam.getCameraPos().z + CHUNK_RADIUS; z++, i++) {
             chunks[i].generate(x, 0, z, seed);
             chunks[i].serialize("assets/world", x, z);
-            chunks[i].deserialize("assets/world", x, z);
+            // chunks[i].deserialize("assets/world", x, z);
             chunks[i].createMesh(textureAtlas);
         }
     }
@@ -54,7 +54,7 @@ int main() {
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
 
-    projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 255.f);
+    projection = glm::perspective(glm::radians(90.0f), 800.f / 600.f, 0.1f, 255.f);
 
     program.bind();
     program.setMat4fv("uModel", model);
