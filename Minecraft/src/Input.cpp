@@ -16,12 +16,22 @@ bool Input::isButtonPressed(int button) {
     return m_buttons[button];
 }
 
+bool Input::isKeySinglePress(int key) {
+    static bool heldDown = false;
+    bool singleKeyPress = false;
+    if (isKeyPressed(key) && heldDown != GLFW_PRESS) {
+        singleKeyPress = true;
+    }
+    heldDown = isKeyPressed(key);
+    return singleKeyPress;
+}
+
 void Input::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    m_keys[key] = action != GLFW_RELEASE;
+    m_keys[key] = action;
 }
 
 void Input::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-    m_buttons[button] = action != GLFW_RELEASE;
+    m_buttons[button] = action;
 }
 
 void Input::cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {

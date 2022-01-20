@@ -22,8 +22,10 @@
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
+bool wireframe = false;
 
 int main() {
+
     Log::init();
     Log::getLogger()->error("Logger initialized");
     const int CHUNK_RADIUS = 8;
@@ -65,7 +67,12 @@ int main() {
     while (window.isOpen()) {
         if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
             window.close(true);
+        if (Input::isKeySinglePress(GLFW_KEY_V)) {
+            wireframe = !wireframe;
+            glPolygonMode(GL_FRONT_AND_BACK, (GL_FILL - wireframe));
+        }
         window.pollEvents();
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;

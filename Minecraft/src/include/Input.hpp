@@ -12,6 +12,8 @@ public:
     static bool isButtonPressed(int button);
     static glm::vec2 getMousePosition() { return m_mousePos; }
 
+    static bool isKeySinglePress(int key);
+
 private:
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);

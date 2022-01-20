@@ -1,4 +1,5 @@
 #include "Chunk.hpp"
+#include "Log.hpp"
 
 #include <GLM/gtc/matrix_transform.hpp>
 #include <SimplexNoise.h>
@@ -124,6 +125,7 @@ void Chunk::createMesh(TextureAtlas &tex) {
     m_nrOfVertices = vertexArrayIndex;
     uploadToGPU(vertices);
     m_loaded = true;
+    Log::getLogger()->info("Chunk {}, {} loaded", m_chunkPosition.x, m_chunkPosition.z);
     delete[] vertices;
 }
 
