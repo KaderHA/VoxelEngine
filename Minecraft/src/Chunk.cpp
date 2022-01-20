@@ -18,6 +18,16 @@ Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0), m_loaded(false) 
     m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
 }
 
+Chunk::Chunk(const Chunk &other)
+    : m_vao(other.m_vao),
+      m_nrOfVertices(other.m_nrOfVertices),
+      m_nrOfIndices(other.m_nrOfIndices),
+      m_loaded(other.m_loaded),
+      m_chunkPosition(other.m_chunkPosition) {
+    m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
+    memcpy(m_blocks, other.m_blocks, CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT);
+}
+
 Chunk::~Chunk() {
     delete[] m_blocks;
 }
@@ -268,4 +278,8 @@ void Chunk::deserialize(const std::string &path, int chunkX, int chunkZ) {
     m_chunkPosition.y = 0;
     fread(m_blocks, sizeof(Block) * (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT), 1, fp);
     fclose(fp);
+}
+
+void Chunk::free() {
+    glDeleteVertexArrays(1, &m_vao);
 }

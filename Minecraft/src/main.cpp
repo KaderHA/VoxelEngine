@@ -3,6 +3,10 @@
 #include <GLM/glm.hpp>
 
 #include <iostream>
+#include <set>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "Camera.hpp"
 #include "Chunk.hpp"
@@ -22,13 +26,17 @@
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
+const int CHUNK_RADIUS = 4;
+const int MAX_LOAD_PER_FRAME = 1;
 bool wireframe = false;
+
+void loadChunks(std::vector<Chunk> &chunks, std::set<std::pair<int, int>> &loaded, const Camera3D &cam, TextureAtlas &tex);
+// void unloadChunks(std::vector<Chunk> &chunks);
 
 int main() {
 
     Log::init();
     Log::getLogger()->error("Logger initialized");
-    const int CHUNK_RADIUS = 8;
     srand(static_cast<unsigned int>(time(0)));
     // int seed = (rand() % 1000) + 1;
     int seed = 0;
@@ -45,15 +53,8 @@ int main() {
 
     // Chunk chunk;
     // chunk.generate(0.f, 0.f, 0.0f, seed);
-    Chunk chunks[((CHUNK_RADIUS * 2) * (CHUNK_RADIUS * 2))];
-    for (int x = cam.getCameraPos().x - CHUNK_RADIUS, i = 0; x < cam.getCameraPos().x + CHUNK_RADIUS; x++) {
-        for (int z = cam.getCameraPos().z - CHUNK_RADIUS; z < cam.getCameraPos().z + CHUNK_RADIUS; z++, i++) {
-            chunks[i].generate(x, 0, z, seed);
-            chunks[i].serialize("assets/world", x, z);
-            // chunks[i].deserialize("assets/world", x, z);
-            chunks[i].createMesh(textureAtlas);
-        }
-    }
+    std::vector<Chunk> chunks;
+    std::set<std::pair<int, int>> loaded;
 
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
@@ -95,13 +96,47 @@ int main() {
         program.setVec3fv("uLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
 
         // chunk.Render(program);
-        for (int x = 0, i = 0; x < (CHUNK_RADIUS * 2); x++) {
-            for (int z = 0; z < (CHUNK_RADIUS * 2); z++, i++) {
-                chunks[i].Render(program);
+        for (int i = 0; i < chunks.size(); i++) {
+            chunks[i].Render(program);
+
+            glm::ivec2 camChunkCoords(cam.getCameraPos().x / 16, cam.getCameraPos().z / 16);
+            glm::ivec2 chunkSpace(chunks[i].getChunkPosition().x - camChunkCoords.x, chunks[i].getChunkPosition().z - camChunkCoords.y);
+            if (((chunkSpace.x * chunkSpace.x) + (chunkSpace.y * chunkSpace.y)) >= (CHUNK_RADIUS * 2) * (CHUNK_RADIUS * 2)) {
+                chunks[i].setLoaded(false);
+                loaded.erase(std::make_pair(chunks[i].getChunkPosition().x, chunks[i].getChunkPosition().z));
             }
         }
+
+        // unloadChunks(chunks);
+        loadChunks(chunks, loaded, cam, textureAtlas);
         window.display();
     }
 
     return 0;
 }
+
+void loadChunks(std::vector<Chunk> &chunks, std::set<std::pair<int, int>> &loaded, const Camera3D &cam, TextureAtlas &tex) {
+    int nrOfLoad = 0;
+    for (int x = (cam.getCameraPos().x / 16) - CHUNK_RADIUS, i = 0; x < (cam.getCameraPos().x / 16) + CHUNK_RADIUS; x++) {
+        for (int z = (cam.getCameraPos().z / 16) - CHUNK_RADIUS; z < (cam.getCameraPos().z / 16) + CHUNK_RADIUS; z++, i++) {
+            if (loaded.find(std::make_pair(x, z)) == loaded.end() && nrOfLoad <= MAX_LOAD_PER_FRAME) {
+                Chunk chunk;
+                chunk.generate(x, 0, z, 0);
+                chunk.createMesh(tex);
+                chunks.emplace_back(chunk);
+                loaded.insert(std::make_pair(x, z));
+                nrOfLoad++;
+            }
+        }
+    }
+}
+
+// void unloadChunks(std::vector<Chunk> &chunks) {
+//     for (auto itr = chunks.begin(); itr != chunks.end();) {
+//         if (!itr->isLoaded()) {
+//             itr->free();
+//             itr = chunks.erase(itr);
+//         } else
+//             itr++;
+//     }
+// }

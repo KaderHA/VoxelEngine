@@ -20,6 +20,8 @@ enum class CubeFace {
 class Chunk {
 public:
     Chunk();
+    Chunk(const Chunk &other);
+
     ~Chunk();
 
     void Update(float dt);
@@ -31,6 +33,8 @@ public:
 
     void serialize(const std::string &path, int chunkX, int chunkZ);
     void deserialize(const std::string &path, int chunkX, int chunkZ);
+
+    void free();
 
     // Gettesr & setters
     glm::vec3 getChunkPosition() const { return m_chunkPosition; }
