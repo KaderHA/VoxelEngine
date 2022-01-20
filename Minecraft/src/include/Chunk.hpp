@@ -32,7 +32,11 @@ public:
     void serialize(const std::string &path, int chunkX, int chunkZ);
     void deserialize(const std::string &path, int chunkX, int chunkZ);
 
+    // Gettesr & setters
     glm::vec3 getChunkPosition() const { return m_chunkPosition; }
+
+    bool isLoaded() const { return m_loaded; }
+    void setLoaded(bool value) { m_loaded = value; }
 
 private:
     void createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace face, const std::vector<Vertex> &cubeVertices, const TextureFormat &blockFormat);
@@ -45,6 +49,7 @@ public:
 private:
     unsigned int m_vao;
     int m_nrOfVertices, m_nrOfIndices;
+    bool m_loaded;
 
     glm::ivec3 m_chunkPosition;
     Block *m_blocks;

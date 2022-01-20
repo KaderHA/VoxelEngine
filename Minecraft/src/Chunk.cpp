@@ -13,7 +13,7 @@ float mapRange(float val, float inMin, float inMax, float outMin, float outMax) 
     return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
-Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0) {
+Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0), m_loaded(false) {
     m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
 }
 
@@ -45,8 +45,8 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 const float incrementSize = 300.f;
-                float heightFloat = mapRange(generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize), -1.0f, 1.0f, 0.8f, 1.0f) * (CHUNK_HEIGHT - 1);
-                int height = (int)heightFloat;
+                float heightFloat = (generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize) + 1) / 2.f;
+                int height = (int)(heightFloat * (CHUNK_HEIGHT - 1));
 
                 m_blocks[chunkIndex].setBlockType(BlockType::Air);
 
@@ -123,6 +123,7 @@ void Chunk::createMesh(TextureAtlas &tex) {
     }
     m_nrOfVertices = vertexArrayIndex;
     uploadToGPU(vertices);
+    m_loaded = true;
     delete[] vertices;
 }
 

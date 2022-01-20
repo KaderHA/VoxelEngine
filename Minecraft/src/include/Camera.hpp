@@ -26,8 +26,8 @@ public:
     void update(float dt);
 
     // Getters
-    glm::mat4 getViewMatrix() { return glm::lookAt(m_position, m_position + m_front, m_up); }
-    glm::vec3 getCameraPos() { return m_position; }
+    glm::mat4 getViewMatrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
+    glm::vec3 getCameraPos() const { return m_position; }
 
 private:
     void updateVectors();
