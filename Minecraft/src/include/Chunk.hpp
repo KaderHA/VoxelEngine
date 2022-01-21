@@ -37,7 +37,7 @@ public:
     void free();
 
     // Gettesr & setters
-    glm::vec3 getChunkPosition() const { return m_chunkPosition; }
+    glm::ivec3 getChunkPosition() const { return m_chunkPosition; }
 
     bool isLoaded() const { return m_loaded; }
     void setLoaded(bool value) { m_loaded = value; }
