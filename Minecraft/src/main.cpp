@@ -8,12 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "Camera.hpp"
-#include "Chunk.hpp"
+#include "ChunkManager.hpp"
 #include "Input.hpp"
 #include "Log.hpp"
-#include "Shader.hpp"
-#include "TextureAtlas.hpp"
 #include "Vertex.hpp"
 #include "Window.hpp"
 
@@ -26,12 +23,7 @@
 // timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
-const int CHUNK_RADIUS = 4;
-const int MAX_LOAD_PER_FRAME = 1;
 bool wireframe = false;
-
-void loadChunks(std::vector<Chunk> &chunks, std::set<std::pair<int, int>> &loaded, const Camera3D &cam, TextureAtlas &tex);
-// void unloadChunks(std::vector<Chunk> &chunks);
 
 int main() {
 
@@ -53,8 +45,8 @@ int main() {
 
     // Chunk chunk;
     // chunk.generate(0.f, 0.f, 0.0f, seed);
-    std::vector<Chunk> chunks;
-    std::set<std::pair<int, int>> loaded;
+    ChunkManager chunks;
+    chunks.init();
 
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
@@ -95,48 +87,10 @@ int main() {
         program.setVec3fv("uLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         program.setVec3fv("uLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
 
-        // chunk.Render(program);
-        for (int i = 0; i < chunks.size(); i++) {
-            chunks[i].Render(program);
-
-            glm::ivec2 camChunkCoords(cam.getCameraPos().x / 16, cam.getCameraPos().z / 16);
-            glm::ivec2 chunkSpace(chunks[i].getChunkPosition().x - camChunkCoords.x, chunks[i].getChunkPosition().z - camChunkCoords.y);
-            if (((chunkSpace.x * chunkSpace.x) + (chunkSpace.y * chunkSpace.y)) >= (CHUNK_RADIUS * 2) * (CHUNK_RADIUS * 2)) {
-                chunks[i].setLoaded(false);
-                loaded.erase(std::make_pair(chunks[i].getChunkPosition().x, chunks[i].getChunkPosition().z));
-            }
-        }
-
-        // unloadChunks(chunks);
-        loadChunks(chunks, loaded, cam, textureAtlas);
+        chunks.update(deltaTime, cam, textureAtlas);
+        chunks.render(program);
         window.display();
     }
 
     return 0;
 }
-
-void loadChunks(std::vector<Chunk> &chunks, std::set<std::pair<int, int>> &loaded, const Camera3D &cam, TextureAtlas &tex) {
-    int nrOfLoad = 0;
-    for (int x = (cam.getCameraPos().x / 16) - CHUNK_RADIUS, i = 0; x < (cam.getCameraPos().x / 16) + CHUNK_RADIUS; x++) {
-        for (int z = (cam.getCameraPos().z / 16) - CHUNK_RADIUS; z < (cam.getCameraPos().z / 16) + CHUNK_RADIUS; z++, i++) {
-            if (loaded.find(std::make_pair(x, z)) == loaded.end() && nrOfLoad <= MAX_LOAD_PER_FRAME) {
-                Chunk chunk;
-                chunk.generate(x, 0, z, 0);
-                chunk.createMesh(tex);
-                chunks.emplace_back(chunk);
-                loaded.insert(std::make_pair(x, z));
-                nrOfLoad++;
-            }
-        }
-    }
-}
-
-// void unloadChunks(std::vector<Chunk> &chunks) {
-//     for (auto itr = chunks.begin(); itr != chunks.end();) {
-//         if (!itr->isLoaded()) {
-//             itr->free();
-//             itr = chunks.erase(itr);
-//         } else
-//             itr++;
-//     }
-// }

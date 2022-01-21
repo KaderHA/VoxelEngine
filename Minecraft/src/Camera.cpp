@@ -8,6 +8,10 @@ Camera3D::Camera3D(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 }
 
 void Camera3D::update(float dt) {
+    if (Input::isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+        m_speed = 40;
+    else
+        m_speed = 10;
     static float lastX = 0, lastY = 0;
     static bool first = true;
 
