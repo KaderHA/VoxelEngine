@@ -71,6 +71,7 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
             }
         }
     }
+    Log::getLogger()->info("Chunk {}, {} generated", m_chunkPosition.x, m_chunkPosition.z);
 }
 
 void Chunk::createMesh(TextureAtlas &tex) {
@@ -135,7 +136,6 @@ void Chunk::createMesh(TextureAtlas &tex) {
     m_nrOfVertices = vertexArrayIndex;
     uploadToGPU(vertices);
     m_loaded = true;
-    Log::getLogger()->info("Chunk {}, {} loaded", m_chunkPosition.x, m_chunkPosition.z);
     delete[] vertices;
 }
 
@@ -278,6 +278,17 @@ void Chunk::deserialize(const std::string &path, int chunkX, int chunkZ) {
     m_chunkPosition.y = 0;
     fread(m_blocks, sizeof(Block) * (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT), 1, fp);
     fclose(fp);
+    Log::getLogger()->info("Chunk {}, {} deserialized", m_chunkPosition.x, m_chunkPosition.z);
+}
+
+bool Chunk::isSerialized(const std::string &path, const glm::ivec2 &pos) {
+    std::string filePath = (path + "/" + std::to_string(pos.x) + "_" + std::to_string(pos.y) + ".bin");
+    if (FILE *file = fopen(filePath.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void Chunk::free() {

@@ -43,8 +43,6 @@ int main() {
     Camera3D cam(glm::vec3(0.0f, Chunk::CHUNK_HEIGHT + 16, 0.0f));
     TextureAtlas textureAtlas("assets/images/terrain.png");
 
-    // Chunk chunk;
-    // chunk.generate(0.f, 0.f, 0.0f, seed);
     ChunkManager chunks;
     chunks.init();
 

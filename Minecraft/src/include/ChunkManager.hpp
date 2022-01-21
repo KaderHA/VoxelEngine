@@ -34,6 +34,4 @@ public:
 
 private:
     static std::unordered_map<glm::ivec3, Chunk, ChunkPositionHash> m_mapChunks;
-    //static std::vector<Chunk *> m_chunks;
-    //static std::set<std::pair<int, int>> m_loaded;
 };

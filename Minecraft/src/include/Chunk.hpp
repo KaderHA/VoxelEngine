@@ -42,6 +42,8 @@ public:
     bool isLoaded() const { return m_loaded; }
     void setLoaded(bool value) { m_loaded = value; }
 
+    static bool isSerialized(const std::string &path, const glm::ivec2 &pos);
+
 private:
     void createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace face, const std::vector<Vertex> &cubeVertices, const TextureFormat &blockFormat);
     uint32_t packData(const glm::uvec3 &position, BlockType type);
