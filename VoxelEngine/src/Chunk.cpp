@@ -10,11 +10,11 @@
 
 #include <fstream>
 
-float mapRange(float val, float inMin, float inMax, float outMin, float outMax) {
-    return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-}
+// float mapRange(float val, float inMin, float inMax, float outMin, float outMax) {
+//     return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+// }
 
-Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0), m_loaded(false) {
+Chunk::Chunk() : m_vao(0), m_nrOfVertices(0), m_nrOfIndices(0), m_loaded(false), m_unload(false) {
     m_blocks = new Block[CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT];
 }
 
@@ -40,7 +40,7 @@ void Chunk::Render(Shader &shader) {
     shader.bind();
 
     glm::mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(m_chunkPosition.x * 16, m_chunkPosition.y * 16, m_chunkPosition.z * 16));
+    model = glm::translate(model, glm::vec3(m_chunkPosition.x * CHUNK_SIZE, m_chunkPosition.y * CHUNK_HEIGHT, m_chunkPosition.z * CHUNK_SIZE));
     shader.setMat4fv("uModel", model, false);
 
     glDrawArrays(GL_TRIANGLES, 0, m_nrOfVertices);
@@ -51,91 +51,90 @@ void Chunk::generate(int chunkX, int chunkY, int chunkZ, int seed) {
 
     SimplexNoise generator(1.0f, 0.5f, 2.0f, 0.5f);
 
-    int chunkIndex = 0;
-    for (int x = 0; x < CHUNK_SIZE; x++) {
+    for (int z = 0; z < CHUNK_SIZE; z++) {
         for (int y = 0; y < CHUNK_HEIGHT; y++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
+            for (int x = 0; x < CHUNK_SIZE; x++) {
+                int index = (z * CHUNK_SIZE * CHUNK_HEIGHT) + (y * CHUNK_SIZE) + x;
                 const float incrementSize = 300.f;
-                float heightFloat = (generator.fractal(5, (x + ((m_chunkPosition.x * 16)) + seed) / incrementSize, (z + ((m_chunkPosition.z * 16)) + seed) / incrementSize) + 1) / 2.f;
-                int height = (int)(heightFloat * (CHUNK_HEIGHT - 1));
+                float heightFloat = (generator.fractal(5, (x + ((m_chunkPosition.x * CHUNK_SIZE)) + seed) / incrementSize, (z + ((m_chunkPosition.z * CHUNK_SIZE)) + seed) / incrementSize) + 1) / 2.f;
+                int height = (int)(heightFloat * 255);
 
-                m_blocks[chunkIndex].setBlockType(BlockType::Air);
+                m_blocks[index].setBlockType(BlockType::Air);
+                int yHeight = y + (chunkY * CHUNK_HEIGHT);
 
-                if (y < height)
-                    m_blocks[chunkIndex].setBlockType(BlockType::Dirt);
-                if (y == 0)
-                    m_blocks[chunkIndex].setBlockType(BlockType::Bedrock);
-                if (y == height - 1)
-                    m_blocks[chunkIndex].setBlockType(BlockType::Grass);
-                chunkIndex++;
+                if (yHeight < height)
+                    m_blocks[index].setBlockType(BlockType::Dirt);
+                if (yHeight == 0)
+                    m_blocks[index].setBlockType(BlockType::Bedrock);
+                if (yHeight == height - 1)
+                    m_blocks[index].setBlockType(BlockType::Grass);
             }
         }
     }
-    Log::getLogger()->info("Chunk {}, {} generated", m_chunkPosition.x, m_chunkPosition.z);
 }
 
 void Chunk::createMesh(TextureAtlas &tex) {
-    const int originX = m_chunkPosition.x * 16;
-    const int originY = m_chunkPosition.y * 16;
-    const int originZ = m_chunkPosition.z * 16;
+    const int originX = m_chunkPosition.x * CHUNK_SIZE;
+    const int originY = m_chunkPosition.y * CHUNK_HEIGHT;
+    const int originZ = m_chunkPosition.z * CHUNK_SIZE;
 
     const int TOTAL_CUBES = Chunk::CHUNK_SIZE * Chunk::CHUNK_SIZE * Chunk::CHUNK_HEIGHT;
     Vertex *vertices = new Vertex[TOTAL_CUBES * 24];
 
     const bool lDefault = false;
     int vertexArrayIndex = 0;
-    for (int x = 0, i = 0, j = 0, counter = 0; x < Chunk::CHUNK_SIZE; x++) {
+    for (int z = 0; z < Chunk::CHUNK_SIZE; z++) {
         for (int y = 0; y < Chunk::CHUNK_HEIGHT; y++) {
-            for (int z = 0; z < Chunk::CHUNK_SIZE; z++, i += 24, counter++) {
-                if (m_blocks[counter].getBlockType() == BlockType::Air)
+            for (int x = 0, i = 0; x < Chunk::CHUNK_SIZE; x++) {
+                int index = (z * CHUNK_SIZE * CHUNK_HEIGHT) + (y * CHUNK_SIZE) + x;
+                if (m_blocks[index].getBlockType() == BlockType::Air)
                     continue;
 
                 std::vector<Vertex> cubeVertices;
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z + 1), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z + 1), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z + 1), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z + 1), m_blocks[counter].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z + 1), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z + 1), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z + 1), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z + 1), m_blocks[index].getBlockType())});
 
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z), m_blocks[counter].getBlockType())});
-                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z), m_blocks[counter].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y + 1, z), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x + 1, y, z), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y, z), m_blocks[index].getBlockType())});
+                cubeVertices.emplace_back(Vertex{packData(glm::uvec3(x, y + 1, z), m_blocks[index].getBlockType())});
 
                 bool lXNegative = lDefault;
-                if (x > 0) lXNegative = m_blocks[counter - (CHUNK_HEIGHT * CHUNK_SIZE)].isActive();
+                if (x > 0) lXNegative = m_blocks[index - 1].isActive();
                 bool lXPositive = lDefault;
-                if (x < CHUNK_SIZE - 1) lXPositive = m_blocks[counter + (CHUNK_HEIGHT * CHUNK_SIZE)].isActive();
+                if (x < CHUNK_SIZE - 1) lXPositive = m_blocks[index + 1].isActive();
                 bool lYNegative = lDefault;
-                if (y > 0) lYNegative = m_blocks[counter - CHUNK_SIZE].isActive();
+                if (y > 0) lYNegative = m_blocks[index - CHUNK_SIZE].isActive();
                 bool lYPositive = lDefault;
-                if (y < CHUNK_HEIGHT - 1) lYPositive = m_blocks[counter + CHUNK_SIZE].isActive();
+                if (y < CHUNK_HEIGHT - 1) lYPositive = m_blocks[index + CHUNK_SIZE].isActive();
                 bool lZNegative = lDefault;
-                if (z > 0) lZNegative = m_blocks[counter - 1].isActive();
+                if (z > 0) lZNegative = m_blocks[index - (CHUNK_SIZE * CHUNK_HEIGHT)].isActive();
                 bool lZPositive = lDefault;
-                if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[counter + 1].isActive();
+                if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[index + (CHUNK_SIZE * CHUNK_HEIGHT)].isActive();
 
                 int faceCount = abs((lXPositive + lXNegative + lYPositive + lYNegative + lZPositive + lZNegative) - 6);
 
-                TextureFormat blockFormat = tex.getUVS(m_blocks[counter].getBlockType());
+                TextureFormat blockFormat = tex.getUVS(m_blocks[index].getBlockType());
 
-                if (!lYPositive)
-                    createFace(vertices, vertexArrayIndex, CubeFace::TOP, cubeVertices, blockFormat);
-                if (!lZNegative)
-                    createFace(vertices, vertexArrayIndex, CubeFace::BACK, cubeVertices, blockFormat);
                 if (!lXNegative)
                     createFace(vertices, vertexArrayIndex, CubeFace::LEFT, cubeVertices, blockFormat);
                 if (!lXPositive)
                     createFace(vertices, vertexArrayIndex, CubeFace::RIGHT, cubeVertices, blockFormat);
+                if (!lZNegative)
+                    createFace(vertices, vertexArrayIndex, CubeFace::BACK, cubeVertices, blockFormat);
                 if (!lZPositive)
                     createFace(vertices, vertexArrayIndex, CubeFace::FRONT, cubeVertices, blockFormat);
                 if (!lYNegative)
                     createFace(vertices, vertexArrayIndex, CubeFace::BOTTOM, cubeVertices, blockFormat);
+                if (!lYPositive)
+                    createFace(vertices, vertexArrayIndex, CubeFace::TOP, cubeVertices, blockFormat);
             }
         }
     }
     m_nrOfVertices = vertexArrayIndex;
     uploadToGPU(vertices);
-    m_loaded = true;
     delete[] vertices;
 }
 
@@ -278,7 +277,6 @@ void Chunk::deserialize(const std::string &path, int chunkX, int chunkZ) {
     m_chunkPosition.y = 0;
     fread(m_blocks, sizeof(Block) * (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT), 1, fp);
     fclose(fp);
-    Log::getLogger()->info("Chunk {}, {} deserialized", m_chunkPosition.x, m_chunkPosition.z);
 }
 
 bool Chunk::isSerialized(const std::string &path, const glm::ivec2 &pos) {

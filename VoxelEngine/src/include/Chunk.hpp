@@ -42,11 +42,15 @@ public:
     bool isLoaded() const { return m_loaded; }
     void setLoaded(bool value) { m_loaded = value; }
 
+    bool unload() const { return m_unload; }
+    void setUnload(bool value) { m_unload = value; }
+
     static bool isSerialized(const std::string &path, const glm::ivec2 &pos);
 
 private:
     void createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace face, const std::vector<Vertex> &cubeVertices, const TextureFormat &blockFormat);
     uint32_t packData(const glm::uvec3 &position, BlockType type);
+    bool calculateChunkNeighbor(const glm::ivec3 &pos, bool &nx, bool &px, bool &ny, bool &py, bool &nz, bool &pz);
 
 public:
     static const int CHUNK_SIZE = 16;
@@ -55,7 +59,7 @@ public:
 private:
     unsigned int m_vao;
     int m_nrOfVertices, m_nrOfIndices;
-    bool m_loaded;
+    bool m_loaded, m_unload;
 
     glm::ivec3 m_chunkPosition;
     Block *m_blocks;

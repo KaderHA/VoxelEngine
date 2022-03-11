@@ -44,7 +44,7 @@ int main() {
     TextureAtlas textureAtlas("assets/images/terrain.png");
 
     ChunkManager chunks;
-    chunks.init();
+    chunks.init(textureAtlas);
 
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
@@ -85,7 +85,7 @@ int main() {
         program.setVec3fv("uLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         program.setVec3fv("uLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
 
-        chunks.update(deltaTime, cam, textureAtlas);
+        chunks.update(deltaTime, cam);
         chunks.render(program);
         window.display();
     }

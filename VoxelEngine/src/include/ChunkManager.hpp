@@ -17,15 +17,15 @@ struct ChunkPositionHash {
 
 class ChunkManager {
 public:
-    static void init();
+    static void init(TextureAtlas &tex);
 
-    static void update(float dt, const Camera3D &camPosition, TextureAtlas &chunkTexture);
+    static void update(float dt, const Camera3D &camPosition);
     static void render(Shader &shader);
 
     static void free();
 
 private:
-    static void loadChunks(const Camera3D &camera, TextureAtlas &tex);
+    static void loadChunks(const Camera3D &camera);
     static void unloadChunks();
 
 public:
@@ -34,4 +34,5 @@ public:
 
 private:
     static std::unordered_map<glm::ivec3, Chunk, ChunkPositionHash> m_mapChunks;
+    static TextureAtlas *m_worldTexture;
 };

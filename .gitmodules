@@ -1,15 +1,15 @@
 [submodule "Minecraft/external/GLFW"]
-	path = Minecraft/external/GLFW
+	path = VoxelEngine/external/GLFW
 	url = https://github.com/glfw/glfw.git
 [submodule "Minecraft/external/GLAD"]
-	path = Minecraft/external/GLAD
+	path = VoxelEngine/external/GLAD
 	url = https://github.com/Dav1dde/glad.git
 [submodule "Minecraft/external/GLM"]
-	path = Minecraft/external/GLM
+	path = VoxelEngine/external/GLM
 	url = https://github.com/g-truc/glm.git
 [submodule "Minecraft/external/SimplexNoise"]
-	path = Minecraft/external/SimplexNoise
+	path = VoxelEngine/external/SimplexNoise
 	url = https://github.com/SRombauts/SimplexNoise.git
 [submodule "Minecraft/external/spdlog"]
-	path = Minecraft/external/spdlog
+	path = VoxelEngine/external/spdlog
 	url = https://github.com/gabime/spdlog.git
