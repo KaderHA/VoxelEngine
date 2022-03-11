@@ -3,6 +3,7 @@ This is an attempt at making a voxel engine using OpenGL and c++
 
 ## Build
 > Note: Currently this code only supports windows
+
 In order to build this you must have git, python and cmake installed. 
 ```batch
 git clone https://github.com/KaderHA/VoxelEngine --recursive
