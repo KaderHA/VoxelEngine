@@ -1,6 +1,6 @@
-#include <GLAD/glad.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <GLM/glm.hpp>
+#include <glm/glm.hpp>
 
 #include <iostream>
 #include <set>
@@ -21,12 +21,11 @@
 #include <time.h>
 
 // timing
-float deltaTime = 0.0f; // time between current frame and last frame
+float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
 bool wireframe = false;
 
 int main() {
-
     Log::init();
     Log::getLogger()->error("Logger initialized");
     srand(static_cast<unsigned int>(time(0)));
@@ -49,7 +48,7 @@ int main() {
     glm::mat4 model(1.0f);
     glm::mat4 projection(1.0f);
 
-    projection = glm::perspective(glm::radians(90.0f), 800.f / 600.f, 0.1f, 255.f);
+    projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 255.f);
 
     program.bind();
     program.setMat4fv("uModel", model);

@@ -2,7 +2,7 @@
 
 #include "stb_image.h"
 
-#include <GLAD/glad.h>
+#include <glad/glad.h>
 #include <iostream>
 
 TextureAtlas::TextureAtlas(const char *filePath) {

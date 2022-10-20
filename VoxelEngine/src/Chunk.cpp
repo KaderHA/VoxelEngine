@@ -1,7 +1,7 @@
 #include "Chunk.hpp"
 #include "Log.hpp"
 
-#include <GLM/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <SimplexNoise.h>
 #include <cmath>
 #include <glad/glad.h>
@@ -114,7 +114,7 @@ void Chunk::createMesh(TextureAtlas &tex) {
                 bool lZPositive = lDefault;
                 if (z < CHUNK_SIZE - 1) lZPositive = m_blocks[index + (CHUNK_SIZE * CHUNK_HEIGHT)].isActive();
 
-                int faceCount = abs((lXPositive + lXNegative + lYPositive + lYNegative + lZPositive + lZNegative) - 6);
+                int faceCount = 6 - (lXPositive + lXNegative + lYPositive + lYNegative + lZPositive + lZNegative);
 
                 TextureFormat blockFormat = tex.getUVS(m_blocks[index].getBlockType());
 
@@ -156,9 +156,9 @@ void Chunk::uploadToGPU(Vertex *vertices) {
 uint32_t Chunk::packData(const glm::uvec3 &position, BlockType type) {
     uint32_t data = 0;
 
-    data |= (position.x & 0x1F);
-    data |= ((position.y << 5) & 0x3FE0);
-    data |= ((position.z << 14) & 0x7C000);
+    data |= (position.x);
+    data |= ((position.y << 5));
+    data |= ((position.z << 14));
     // data |= ((static_cast<uint16_t>(type) << 19) & 0xFFF0000);
     return data;
 }
@@ -193,63 +193,63 @@ void Chunk::createFace(Vertex *vertices, int &vertexArrayIndex, const CubeFace f
     vertices[vertexArrayIndex + 5].data |= ((texture << 24) & 0xFF000000);
 
     switch (face) {
-    case CubeFace::TOP:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+        case CubeFace::TOP:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
-        break;
-    case CubeFace::BACK:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+            break;
+        case CubeFace::BACK:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
-        break;
-    case CubeFace::LEFT:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+            break;
+        case CubeFace::LEFT:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
-        break;
-    case CubeFace::RIGHT:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(8 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+            break;
+        case CubeFace::RIGHT:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
-        break;
-    case CubeFace::FRONT:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(5 - 1)].data;
+            break;
+        case CubeFace::FRONT:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
-        break;
-    case CubeFace::BOTTOM:
-        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(4 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(1 - 1)].data;
+            break;
+        case CubeFace::BOTTOM:
+            vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(7 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
 
-        vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
-        vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
-        break;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(3 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(6 - 1)].data;
+            vertices[vertexArrayIndex++].data |= cubeVertices[(2 - 1)].data;
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -257,7 +257,7 @@ void Chunk::serialize(const std::string &path, int chunkX, int chunkZ) {
     std::string filePath = path + "/" + std::to_string(chunkX) + "_" + std::to_string(chunkZ) + ".bin";
     FILE *fp = std::fopen(filePath.c_str(), "wb");
     if (!fp) {
-        std::printf("ERROR::CHUNK_CPP::SERIALIZE::COUDL_NOT_CREATE_FILE -> %s\n", filePath);
+        std::printf("ERROR::CHUNK_CPP::SERIALIZE::COUDL_NOT_CREATE_FILE -> %s\n", filePath.c_str());
     }
 
     fwrite(&chunkX, sizeof(int), 1, fp);

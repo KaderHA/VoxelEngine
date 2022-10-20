@@ -1,8 +1,8 @@
 #pragma once
-#include <GLAD/glad.h>
+#include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
-#include <GLM/glm.hpp>
+#include <glm/glm.hpp>
 
 class Input {
     friend class Window;
