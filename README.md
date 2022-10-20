@@ -1,6 +1,9 @@
 # Voxel engine
 This is an attempt at making a voxel engine using OpenGL and c++
 
+![bilde](https://user-images.githubusercontent.com/72559835/157936591-7c8d9441-bd39-4935-88da-896ebc38854a.png)
+
+
 ## Build
 > Note: Currently this code only supports windows
 
